@@ -3,14 +3,33 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as firebase from 'firebase';
 
 class UserForm extends Component {
+  title;
+  id;
+  
   constructor(props){
     super(props);  
+    this.id = this.props.match.params.id;
+    this.title = 'New User';
   }
+
+  componentDidMount(){
+    if(this.id){
+      this.title = 'Edit User';
+        firebase.database().ref('/' + this.id)
+        .on('value',snapshot => {            
+            this.setState({
+                username: snapshot.val().username,
+                email: snapshot.val().email,
+            });              
+          });        
+    }
+  }  
+
   
   render(){
     return(
       <div>
-          <h1>{this.title}</h1>
+          <h1>{this.title}}</h1>
           <Formik
             initialValues={{ username: '', email: '' }}
             validate={values => {
@@ -38,11 +57,19 @@ class UserForm extends Component {
             onSubmit={(values, { setSubmitting }) => {
               setTimeout(() => {
                 // actual submit logic...         
-                firebase.database().ref('/').push({
-                    username: this.state.username,	
-                    email: this.state.email  
-                }).then(() => this.props.history.push("/"));                                  
-                
+                if(this.id){
+                    firebase.database().ref('/'+this.id).update({
+                        username: this.state.username,	
+                        email: this.state.email  
+                      }).then(() => this.props.history.push("/"));                                                          
+                }
+                else{
+                    firebase.database().ref('/').push({
+                        username: this.state.username,	
+                        email: this.state.email  
+                      }).then(() => this.props.history.push("/"));                                
+                }       
+                                                             
                 setSubmitting(false);
               }, 400);
             }}
