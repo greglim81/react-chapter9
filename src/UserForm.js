@@ -10,7 +10,7 @@ class UserForm extends Component {
   render(){
     return(
       <div>
-          <h1>Any place in your app!</h1>
+          <h1>{this.title}</h1>
           <Formik
             initialValues={{ username: '', email: '' }}
             validate={values => {
